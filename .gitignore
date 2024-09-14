@@ -1,2 +1,3 @@
 startPostman.sh
-config
+.env
+.vscode

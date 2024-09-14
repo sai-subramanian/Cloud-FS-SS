@@ -26,7 +26,8 @@ func AwsInit() (AWSService,error) {
 	return awsService,nil
 }
 
-func (awsSvc AWSService) UploadFile(bucketName string , bucketKey string, fileName string) error{
+func (awsSvc AWSService) UploadFile( bucketKey string, fileName string) error{
+	bucketName := "golang-test-zztzz" // to be moved to config file
 	file, err := os.Open(fileName) 
 	if err != nil{
 		log.Println("error while opening the file", err)

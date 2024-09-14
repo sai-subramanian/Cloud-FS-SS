@@ -16,12 +16,12 @@ func FileRoutes(router *gin.Engine,awsService s3_service.AWSService) {
 
     // Route to upload a file
 	router.POST("/upload", func(c *gin.Context) {
-		bucketName := "your-bucket-name"
-		bucketKey := "your-file-key"
-		fileName := "path/to/your/file"
+		
+		bucketKey := "test2.txt"
+		fileName := "/home/sai/Data/projects/21BCE0040_Backend/TextFile(1).txt"
 
 		// Use the s3Client to upload the file to S3
-		err := awsService.UploadFile(bucketName, bucketKey, fileName)
+		err := awsService.UploadFile( bucketKey, fileName)
 		if err != nil {
 			c.JSON(500, gin.H{
 				"error": "File upload failed",
