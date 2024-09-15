@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/sai-subramanian/21BCE0040_Backend.git/config"
+	"github.com/sai-subramanian/21BCE0040_Backend.git/configl"
 	"github.com/sai-subramanian/21BCE0040_Backend.git/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -57,7 +57,7 @@ func SignUp(c *gin.Context){
 	user.Name = body.Name
     user.PhoneNumber = body.PhoneNumber
     
-	result := config.DB.Create(&user)
+	result := configl.DB.Create(&user)
 
 	if result.Error != nil{
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -76,7 +76,7 @@ func SignUp(c *gin.Context){
 
 func GetAllUsers(c *gin.Context){
 	var users []models.User
-	config.DB.Find(&users)
+	configl.DB.Find(&users)
 
 	c.JSON(http.StatusOK, gin.H{
 		"users": users,
@@ -99,7 +99,7 @@ func Login(c *gin.Context){
 	} 
 	//look up the requested user
 	var user models.User
-	config.DB.First(&user, "email = ?", body.Email)
+	configl.DB.First(&user, "email = ?", body.Email)
 	fmt.Println("Queried user:", user)
 
 	if user.ID == 0{

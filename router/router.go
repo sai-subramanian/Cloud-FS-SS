@@ -2,7 +2,7 @@ package router
 
 import (
 	"net/http"
-
+	"time"
 	"github.com/gin-gonic/gin"
 	"github.com/sai-subramanian/21BCE0040_Backend.git/s3_service"
 	"github.com/sai-subramanian/21BCE0040_Backend.git/user"
@@ -17,21 +17,24 @@ func FileRoutes(router *gin.Engine,awsService s3_service.AWSService) {
 
     // Route to upload a file
 	router.POST("/upload", func(c *gin.Context) {
-		
-		bucketKey := "test2.txt"
-		fileName := "/home/sai/Data/projects/21BCE0040_Backend/TextFile(1).txt"
-
-		// Use the s3Client to upload the file to S3
-		err := awsService.UploadFile( bucketKey, fileName)
-		if err != nil {
-			c.JSON(500, gin.H{
-				"error": "File upload failed",
+		var req s3_service.S3Dto
+		if err := c.BindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid request payload",
 			})
-		} else {
-			c.JSON(200, gin.H{
-				"message": "File uploaded successfully",
-			})
+			return
 		}
+		
+		currentTime := time.Now()
+		tenDaysFromNow := currentTime.AddDate(0, 0, 10)
+		req.ExpirationDate = tenDaysFromNow
+
+		if err := awsService.UploadFile(c, req);  err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file"})
+			return
+		}
+	
+		// c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully"})
 	})
 
 	router.POST("/signup",user.SignUp )

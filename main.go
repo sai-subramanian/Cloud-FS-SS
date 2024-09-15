@@ -4,15 +4,15 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sai-subramanian/21BCE0040_Backend.git/config"
+	"github.com/sai-subramanian/21BCE0040_Backend.git/configl"
 	"github.com/sai-subramanian/21BCE0040_Backend.git/router"
 	"github.com/sai-subramanian/21BCE0040_Backend.git/s3_service"
 )
 
 
 func init(){
-	config.LoadEnv()
-	config.ConnectDatabase()
+	configl.LoadEnv()
+	configl.ConnectDatabase()
 }
 
 
