@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sai-subramanian/21BCE0040_Backend.git/s3_service"
+	"github.com/sai-subramanian/21BCE0040_Backend.git/user"
 )
 
 func FileRoutes(router *gin.Engine,awsService s3_service.AWSService) {
@@ -32,4 +33,8 @@ func FileRoutes(router *gin.Engine,awsService s3_service.AWSService) {
 			})
 		}
 	})
+
+	router.POST("/signup",user.SignUp )
+	router.POST("/login",user.Login )
+	
 }
