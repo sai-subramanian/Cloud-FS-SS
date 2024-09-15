@@ -18,8 +18,8 @@ Welcome to the File Storage and Sharing Service! This project is designed to str
 
 #### Prerequisites
 
-- Go (1.18+)
-- AWS CLI (for managing S3)
+- Go (1.23+)
+- AWS SDK and Cloud Console (for managing S3)
 - Docker (optional, for containerized deployment)
 
 #### Installation
