@@ -32,10 +32,10 @@ Welcome to the File Storage and Sharing Service! This project is designed to str
 
 2. **Install Dependencies**
 
-Ensure you have Go installed. Install the required Go modules:
- ```bash
+  Ensure you have Go installed. Install the required Go modules:
+
+    ```bash
     go mod download 
-   
 
 3. **Configure AWS**
 
@@ -49,11 +49,6 @@ Make sure your AWS credentials are configured properly. Place your AWS credentia
     ```bash
     docker build -t file-service .
     docker run -p 8080:8080 -e AWS_ACCESS_KEY_ID=your_access_key -e AWS_SECRET_ACCESS_KEY=your_secret_key file-service
-
-
-
-
-
 
 ## API Routes
 
