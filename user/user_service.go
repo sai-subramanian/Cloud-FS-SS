@@ -123,7 +123,7 @@ func Login(c *gin.Context) {
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString([]byte("srirams-secret1912232480823ifbefw08fhu"))
+	tokenString, err := token.SignedString([]byte("test"))
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
