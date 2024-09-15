@@ -2,3 +2,4 @@ startPostman.sh
 .env
 .vscode
 .aws
+test/
