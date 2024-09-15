@@ -31,10 +31,8 @@ Welcome to the File Storage and Sharing Service! This project is designed to str
    cd your-repo
 
 2. **Install Dependencies**
-
-  Ensure you have Go installed. Install the required Go modules:
-
-    ```bash
+   Ensure you have Go installed. Install the required Go modules:
+  ```bash
     go mod download 
 
 3. **Configure AWS**
