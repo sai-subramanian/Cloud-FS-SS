@@ -97,7 +97,7 @@ func (awsSvc AWSService) UploadFile(c *gin.Context, req S3Dto) error {
 
 func (awsSvc *AWSService) GetSignedUrlHandler(c *gin.Context) {
 
-	objectKey := c.Param("key")
+	objectKey := c.Param("file_id")
 
 	signedUrl, err := awsSvc.GetSignedUrl(objectKey)
 	if err != nil {
@@ -112,6 +112,37 @@ func (awsSvc *AWSService) GetSignedUrlHandler(c *gin.Context) {
 		"signed_url": signedUrl,
 	})
 }
+
+
+
+func GetFilesByUserId(c *gin.Context) {
+
+	userId := c.Param("userId")
+
+	var files []models.File
+
+	result := configl.DB.Where("createdby = ?", userId).Find(&files)
+
+	if result.Error != nil {
+		log.Println("error while fetching files:", result.Error)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to retrieve files",
+		})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "No files found for the given user",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"files": files,
+	})
+}
+
 
 func (awsSvc *AWSService) GetSignedUrl(objectKey string) (string, error) {
 	bucketName := os.Getenv("bucketName")
