@@ -18,27 +18,41 @@ func FileRoutes(router *gin.Engine,awsService s3_service.AWSService) {
 	})
 
 
-    // Route to upload a file
+   
 	router.POST("/upload", func(c *gin.Context) {
-		var req s3_service.S3Dto
-		if err := c.BindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid request payload",
-			})
-			return
-		}
-		
-		currentTime := time.Now()
-		tenDaysFromNow := currentTime.AddDate(0, 0, 10)
-		req.ExpirationDate = tenDaysFromNow
+   
+    file, _, err := c.Request.FormFile("file")
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Failed to retrieve file",
+        })
+        return
+    }
+    
+    userId := c.PostForm("userId")
+    bucketKey := c.PostForm("bucketKey")
+    contentType := c.PostForm("contentType")
 
-		if err := awsService.UploadFile(c, req);  err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file"})
-			return
-		}
-	
-		// c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully"})
-	})
+    currentTime := time.Now()
+    tenDaysFromNow := currentTime.AddDate(0, 0, 5)
+
+    
+    req := s3_service.S3Dto{
+        File:    file, 
+        UserId:      userId,
+        BucketKey:   bucketKey,
+        ContentType: contentType,
+        ExpirationDate: tenDaysFromNow,
+    }
+
+    
+    if err := awsService.UploadFile(c, req); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully"})
+})
 	router.GET("/files/:userId",awsService.GetSignedUrlHandler)
 	router.GET("/share/:file_id",awsService.GetSignedUrlHandler)
 
@@ -49,7 +63,7 @@ func FileRoutes(router *gin.Engine,awsService s3_service.AWSService) {
 		
 		userId := c.Query("userId")
 		fileName := c.Query("fileName")
-		
+
 		//  format to be passed : YYYY-MM-DD
 		startDate := c.Query("startDate") 
 		endDate := c.Query("endDate")     

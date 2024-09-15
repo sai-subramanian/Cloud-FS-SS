@@ -34,7 +34,7 @@ func (awsSvc AWSService) UploadFile(c *gin.Context, req S3Dto) error {
 	bucketName := os.Getenv("bucketName")
 
 	// Open the file
-	file, err := os.Open(req.FileName)
+	file, _, err := c.Request.FormFile("file")
 	if err != nil {
 		log.Println("error while opening the file", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
