@@ -71,6 +71,7 @@ func SignUp(c *gin.Context){
 	//response
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User created successfully",
+		"user":user,
 	})
 }
 

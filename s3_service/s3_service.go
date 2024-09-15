@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -30,7 +31,7 @@ func AwsInit() (AWSService, error) {
 }
 
 func (awsSvc AWSService) UploadFile(c *gin.Context, req S3Dto) error {
-	bucketName := "golang-test-zztzz" // to be moved to config file
+	bucketName := os.Getenv("bucketName")
 
 	// Open the file
 	file, err := os.Open(req.FileName)
@@ -47,11 +48,11 @@ func (awsSvc AWSService) UploadFile(c *gin.Context, req S3Dto) error {
 		}
 	}()
 
-	// Upload the file to the bucket
+	// Uploading the file to the bucket
 	_, err = awsSvc.S3Client.PutObject(context.TODO(), &s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(req.BucketKey),
-		Body:   file,
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String(req.BucketKey),
+		Body:        file,
 		ContentType: aws.String(req.ContentType),
 	})
 	if err != nil {
@@ -64,10 +65,18 @@ func (awsSvc AWSService) UploadFile(c *gin.Context, req S3Dto) error {
 
 	// Create a new db entry in the table file, with metadata about the file
 	newFileDb := models.File{
-		Createdby: req.UserId,
-		Key:       req.BucketKey,
+		Createdby:      req.UserId,
+		Key:            req.BucketKey,
 		ExpirationDate: req.ExpirationDate,
 	}
+	url, err := awsSvc.GetSignedUrl(req.BucketKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to generate signed URL",
+		})
+		return err
+	}
+	newFileDb.Url = url
 	result := configl.DB.Create(&newFileDb)
 
 	if result.Error != nil {
@@ -80,7 +89,50 @@ func (awsSvc AWSService) UploadFile(c *gin.Context, req S3Dto) error {
 	// Response
 	c.JSON(http.StatusOK, gin.H{
 		"message": "File uploaded and record created successfully",
+		"file":    newFileDb,
 	})
 
 	return nil
+}
+
+func (awsSvc *AWSService) GetSignedUrlHandler(c *gin.Context) {
+
+	objectKey := c.Param("key")
+
+	signedUrl, err := awsSvc.GetSignedUrl(objectKey)
+	if err != nil {
+		log.Println("Failed to generate signed URL:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to generate signed URL",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"signed_url": signedUrl,
+	})
+}
+
+func (awsSvc *AWSService) GetSignedUrl(objectKey string) (string, error) {
+	bucketName := os.Getenv("bucketName")
+	// setting the url valid for 5 days in the future when the url expires we can call this endpoint again and
+	// reset the db url back with the fresh url
+	// or if we want permanent url we can have it using : https://<bucket-name>.s3.amazonaws.com/<object-key>
+	// currently i have made the s3 bucket public for time being so that it does not give ACL issue
+	// in future we can make it restricted and just return the signed url from here
+	presignDuration := time.Duration(5 * 24 * time.Hour)
+
+	presigner := s3.NewPresignClient(awsSvc.S3Client)
+
+	req, err := presigner.PresignGetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	}, s3.WithPresignExpires(presignDuration))
+
+	if err != nil {
+		log.Println("Error generating presigned URL:", err)
+		return "", err
+	}
+
+	return req.URL, nil
 }

@@ -36,6 +36,7 @@ func FileRoutes(router *gin.Engine,awsService s3_service.AWSService) {
 	
 		// c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully"})
 	})
+	router.GET("file/signed-url/:key",awsService.GetSignedUrlHandler)
 
 	router.POST("/signup",user.SignUp )
 	router.POST("/login",user.Login )
