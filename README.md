@@ -32,7 +32,7 @@ Welcome to the File Storage and Sharing Service! This project is designed to str
 
 2. **Install Dependencies**
    Ensure you have Go installed. Install the required Go modules:
-  ```bash
+   ```bash
     go mod download 
 
 3. **Configure AWS**
